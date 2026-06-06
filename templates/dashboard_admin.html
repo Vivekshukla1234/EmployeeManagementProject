@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Welcome Header -->
+    <div class="welcome-banner">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Admin Workspace</h1>
+        <p style="color: var(--text-muted);">Manager: <strong>{{ admin_name }}</strong> &nbsp;|&nbsp; Enterprise Operations Control Panel</p>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="stat-label">Total Staff</div>
+            <div class="stat-value">{{ employee_count }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">System Operations</div>
+            <div class="stat-value" style="color: var(--accent-purple);">Active</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Security Role</div>
+            <div class="stat-value" style="color: #10b981; font-size: 1.5rem; line-height: 2.7rem;">Administrator</div>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="search-bar-container">
+        <form method="get" class="search-form">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, email, department, or designation..." class="search-input">
+            <button type="submit" class="btn-search">Search</button>
+            {% if search_query %}
+                <a href="{% url 'admin_dashboard' %}" class="btn-clear" style="line-height: normal; display: inline-flex; align-items: center;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Employee Management Card -->
+    <div class="dashboard-card" style="width: 100%; max-width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Registered Corporate Profiles</h3>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="{% url 'admin_analytics_dashboard' %}" class="btn-add-employee" style="background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);"><span>📊</span> System Analytics</a>
+                <a href="{% url 'admin_performance_list' %}" class="btn-add-employee" style="background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-indigo) 100%); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);"><span>🏆</span> Performance Scores</a>
+                <a href="{% url 'admin_leave_list' %}" class="btn-add-employee" style="background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-indigo) 100%); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);"><span>📅</span> Leave requests</a>
+                <a href="{% url 'admin_attendance_report' %}" class="btn-add-employee" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: #ffffff;"><span>⏱️</span> Attendance master</a>
+                <a href="{% url 'employee_add' %}" class="btn-add-employee"><span>+</span> Add Employee</a>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Email Address</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Salary</th>
+                        <th>Role Type</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees %}
+                        <tr>
+                            <td><strong>{{ emp.name }}</strong></td>
+                            <td>{{ emp.email }}</td>
+                            <td>{{ emp.department }}</td>
+                            <td>{{ emp.designation }}</td>
+                            <td>${{ emp.salary|floatformat:2 }}</td>
+                            <td>
+                                {% if emp.role == 'Admin' %}
+                                    <span class="badge badge-admin">Administrator</span>
+                                {% else %}
+                                    <span class="badge badge-employee">Employee</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-links" style="justify-content: center;">
+                                    <a href="{% url 'employee_detail' pk=emp.pk %}" class="action-link action-view">View</a>
+                                    <a href="{% url 'employee_edit' pk=emp.pk %}" class="action-link action-edit">Edit</a>
+                                    {% if emp.user != request.user %}
+                                        <a href="{% url 'employee_delete' pk=emp.pk %}" class="action-link action-delete">Delete</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                No employee records found matching your search.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

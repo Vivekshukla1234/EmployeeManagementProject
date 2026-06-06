@@ -1,0 +1,11 @@
+Django>=6.0.0
+mysqlclient>=2.2.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+pillow>=10.0.0
+tzdata
+numpy
+scipy
+sqlparse
+asgiref
+python-dateutil

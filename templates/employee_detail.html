@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Employee File - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper" style="max-width: 800px;">
+    <!-- Welcome Header -->
+    <div class="welcome-banner">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Employee File</h1>
+        <p style="color: var(--text-muted);">Record Profile: <strong>{{ employee.name }}</strong></p>
+    </div>
+
+    <div class="dashboard-grid" style="grid-template-columns: 1fr;">
+        <!-- Employee Profile Details -->
+        <div class="dashboard-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Corporate Identity Details <span>👤</span></h3>
+                {% if is_admin %}
+                    <span class="badge badge-admin">Administrator Access</span>
+                {% endif %}
+            </div>
+            
+            <ul class="profile-info-list">
+                <li>
+                    <span class="info-label">Full Name</span>
+                    <span class="info-value">{{ employee.name }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value">{{ employee.email }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Contact Number</span>
+                    <span class="info-value">{% if employee.phone %}{{ employee.phone }}{% else %}Not provided{% endif %}</span>
+                </li>
+                <li>
+                    <span class="info-label">Department</span>
+                    <span class="info-value">{{ employee.department }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Designation</span>
+                    <span class="info-value">{{ employee.designation }}</span>
+                </li>
+                <li>
+                    <span class="info-label">Current Salary</span>
+                    <span class="info-value">${{ employee.salary|floatformat:2 }}</span>
+                </li>
+                <li>
+                    <span class="info-label">System Access Group</span>
+                    <span class="info-value">
+                        {% if employee.role == 'Admin' %}
+                            <span class="badge badge-admin">Administrator</span>
+                        {% else %}
+                            <span class="badge badge-employee">Employee</span>
+                        {% endif %}
+                    </span>
+                </li>
+                {% if employee.user %}
+                <li>
+                    <span class="info-label">Username credentials</span>
+                    <span class="info-value">@{{ employee.user.username }}</span>
+                </li>
+                {% endif %}
+            </ul>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap;">
+                <a href="{% url 'dashboard' %}" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; line-height: 1.3; min-width: 150px;">Back to Dashboard</a>
+                
+                {% if is_admin %}
+                    <a href="{% url 'employee_edit' pk=employee.pk %}" class="btn-submit" style="flex: 1; text-align: center; text-decoration: none; line-height: 1.3; min-width: 150px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Edit Profile</a>
+                    
+                    {% if employee.user != request.user %}
+                        <a href="{% url 'employee_delete' pk=employee.pk %}" class="btn-danger" style="flex: 1; text-align: center; text-decoration: none; line-height: 1.3; min-width: 150px;">Delete Profile</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

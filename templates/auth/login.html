@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<div class="glass-card">
+    <h2 class="gradient-title">Welcome Back</h2>
+    <p class="subtitle">Access your account and portal options</p>
+
+    {% if form.non_field_errors %}
+        <div class="error-list">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Role Selection -->
+        <div class="role-group-container">
+            <label>{{ form.role.label }}</label>
+            <ul class="role-radio-list">
+                {% for radio in form.role %}
+                    <li>
+                        <label for="{{ radio.id_for_label }}">
+                            {{ radio.tag }}
+                            <span>{{ radio.choice_label }}</span>
+                        </label>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Username field -->
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div class="error-list" style="margin-top: 0.5rem; margin-bottom: 0;">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="error-list" style="margin-top: 0.5rem; margin-bottom: 0;">
+                    {{ form.password.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn-submit" style="margin-top: 1rem;">Sign In</button>
+    </form>
+
+    <div class="auth-links">
+        <a href="{% url 'password_reset' %}">Forgot Password?</a>
+    </div>
+</div>
+{% endblock %}

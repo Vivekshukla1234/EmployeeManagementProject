@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Report - {{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper" style="max-width: 900px;">
+    <!-- Welcome Header -->
+    <div class="welcome-banner">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Attendance Analytics</h1>
+        <p style="color: var(--text-muted);">Employee: <strong>{{ employee.name }}</strong> &nbsp;|&nbsp; Department: <strong>{{ employee.department }}</strong></p>
+    </div>
+
+    <!-- Filters & Summary Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-bottom: 2rem; align-items: start;">
+        <!-- Filters Box -->
+        <div class="dashboard-card" style="padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">Select Calendar Scope</h3>
+            <form method="get" class="search-form" style="flex-direction: column; gap: 1rem; align-items: stretch;">
+                <input type="hidden" name="employee_id" value="{{ employee.pk }}">
+                <div class="form-group" style="margin: 0;">
+                    <label>Month</label>
+                    <select name="month" class="role-select">
+                        {% for num, name in month_choices %}
+                            <option value="{{ num }}" {% if num == selected_month %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <label>Year</label>
+                    <select name="year" class="role-select">
+                        {% for yr in year_choices %}
+                            <option value="{{ yr }}" {% if yr == selected_year %}selected{% endif %}>{{ yr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn-search" style="margin-top: 0.5rem; width: 100%;">Filter logs</button>
+            </form>
+        </div>
+
+        <!-- Stats Box -->
+        <div class="dashboard-card" style="padding: 1.5rem;">
+            <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.25rem;">Summary Stats</h3>
+            <div class="stats-row" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                <div class="stat-box" style="padding: 1rem;">
+                    <div class="stat-label" style="font-size: 0.7rem;">Present</div>
+                    <div class="stat-value" style="font-size: 1.4rem;">{{ present_days }} Days</div>
+                </div>
+                <div class="stat-box" style="padding: 1rem;">
+                    <div class="stat-label" style="font-size: 0.7rem;">Working Weekdays</div>
+                    <div class="stat-value" style="font-size: 1.4rem; color: var(--accent-purple);">{{ total_working_days }} Days</div>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div class="stat-label" style="font-size: 0.75rem;">Attendance Ratio</div>
+                <div class="stat-value" style="font-size: 2.2rem; font-weight: 800; color: var(--accent-cyan);">
+                    {{ attendance_percentage|floatformat:1 }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs List Card -->
+    <div class="dashboard-card" style="width: 100%; max-width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Detailed Logs: {{ selected_month }}/{{ selected_year }}</h3>
+            <a href="{% url 'dashboard' %}" class="btn-secondary" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.85rem; line-height: 1.3;">Back to Dashboard</a>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Day of Week</th>
+                        <th>Logged Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for att in attendances %}
+                        <tr>
+                            <td><strong>{{ att.date|date:"F d, Y" }}</strong></td>
+                            <td>{{ att.date|date:"l" }}</td>
+                            <td>
+                                {% if att.status == 'Present' %}
+                                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">Present</span>
+                                {% elif att.status == 'Leave' %}
+                                    <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">On Leave</span>
+                                {% else %}
+                                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">Absent</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                No attendance records found for this period.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Employee Portal{% endblock %} - Employee Management System</title>
+    <!-- Premium Stylesheet -->
+    <link rel="stylesheet" href="{% static 'employee/css/styles.css' %}">
+</head>
+<body>
+    <!-- Background Gradient Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="nav-container">
+            <a href="{% url 'dashboard' %}" class="logo">
+                <span>✦</span> EmployeeHub
+            </a>
+            <div class="nav-links">
+                {% if user.is_authenticated %}
+                    <span class="user-greeting">Welcome, <strong>{{ user.username }}</strong></span>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline; margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-nav-logout">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" style="font-weight: 500;">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

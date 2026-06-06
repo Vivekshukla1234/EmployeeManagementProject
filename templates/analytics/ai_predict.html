@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Performance Predictor{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 540px; text-align: left;">
+    <h2 class="gradient-title" style="text-align: center;">AI Grade Predictor</h2>
+    <p class="subtitle" style="text-align: center;">Run what-if analysis. Input custom metrics to see the AI predicted classification instantly.</p>
+
+    <!-- Messages feedback -->
+    {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" style="font-size: 0.85rem; padding: 0.65rem 1rem; border-radius: 8px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'admin_ai_predict' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_attendance">Attendance Percentage (%)</label>
+            <input type="number" id="id_attendance" name="attendance" value="{{ attendance|default_if_none:'' }}" min="0.0" max="100.0" step="0.1" class="role-select" placeholder="e.g. 92.5" required>
+            <span class="help-text">Percentage of weekdays present in the calendar month.</span>
+        </div>
+
+        <div class="form-group">
+            <label for="id_task_completion">Task Completion Rate (%)</label>
+            <input type="number" id="id_task_completion" name="task_completion" value="{{ task_completion|default_if_none:'' }}" min="0.0" max="100.0" step="0.1" class="role-select" placeholder="e.g. 88.0" required>
+            <span class="help-text">Percentage of assigned tasks completed successfully.</span>
+        </div>
+
+        <div class="form-group">
+            <label for="id_rating">Project Rating (0.0 - 5.0)</label>
+            <input type="number" id="id_rating" name="rating" value="{{ rating|default_if_none:'' }}" min="0.0" max="5.0" step="0.1" class="role-select" placeholder="e.g. 4.5" required>
+            <span class="help-text">Supervisor evaluation score (from 0.0 to 5.0).</span>
+        </div>
+
+        <button type="submit" class="btn-submit" style="margin-top: 1rem; background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-indigo) 100%); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);">
+            Analyze & Predict Grade
+        </button>
+    </form>
+
+    {% if prediction %}
+        <div style="border-top: 1px solid var(--border-color); margin-top: 2rem; padding-top: 1.5rem; text-align: center;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em;">AI Predicted Classification</div>
+            <div style="margin-top: 0.75rem;">
+                {% if prediction == 'Excellent' %}
+                    <span class="badge badge-excellent" style="font-size: 1.5rem; padding: 0.5rem 1.5rem;">Excellent</span>
+                {% elif prediction == 'Good' %}
+                    <span class="badge badge-good" style="font-size: 1.5rem; padding: 0.5rem 1.5rem;">Good</span>
+                {% elif prediction == 'Average' %}
+                    <span class="badge badge-average" style="font-size: 1.5rem; padding: 0.5rem 1.5rem;">Average</span>
+                {% else %}
+                    <span class="badge badge-poor" style="font-size: 1.5rem; padding: 0.5rem 1.5rem;">Poor</span>
+                {% endif %}
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 1rem; line-height: 1.4;">
+                Prediction is computed using the trained RandomForest model on standard corporate metrics.
+            </p>
+        </div>
+    {% endif %}
+
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="{% url 'admin_performance_list' %}" style="font-size: 0.85rem; color: var(--text-muted); text-decoration: underline;">
+            Back to Reviews
+        </a>
+    </div>
+</div>
+{% endblock %}

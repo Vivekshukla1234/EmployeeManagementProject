@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 540px; text-align: left;">
+    <h2 class="gradient-title" style="text-align: center;">{{ title }}</h2>
+    <p class="subtitle" style="text-align: center;">Record employee monthly parameters. Score & AI evaluation are computed automatically.</p>
+
+    <!-- Error Feedback -->
+    {% if form.non_field_errors or form.errors %}
+        <div class="error-list" style="margin-bottom: 1.5rem;">
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.employee.id_for_label }}">Employee Profile</label>
+            {{ form.employee }}
+        </div>
+
+        <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <label for="{{ form.month.id_for_label }}">Month</label>
+                {{ form.month }}
+            </div>
+            <div>
+                <label for="{{ form.year.id_for_label }}">Year</label>
+                {{ form.year }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.task_completion_percentage.id_for_label }}">Task Completion Percentage (%)</label>
+            {{ form.task_completion_percentage }}
+            <span class="help-text">Input a float value between 0.0 and 100.0.</span>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.project_rating.id_for_label }}">Project Rating (0.0 - 5.0)</label>
+            {{ form.project_rating }}
+            <span class="help-text">Input a float rating between 0.0 and 5.0.</span>
+        </div>
+
+        <button type="submit" class="btn-submit" style="margin-top: 1rem;">
+            Save Evaluation Record
+        </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="{% url 'admin_performance_list' %}" style="font-size: 0.85rem; color: var(--text-muted); text-decoration: underline;">
+            Cancel & View List
+        </a>
+    </div>
+</div>
+{% endblock %}

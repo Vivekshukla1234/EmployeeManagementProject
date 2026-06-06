@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Master Attendance Report{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Welcome Header -->
+    <div class="welcome-banner">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Corporate Attendance Master</h1>
+        <p style="color: var(--text-muted);">Central Administration &nbsp;|&nbsp; Daily check-in monitoring and manual overrides</p>
+    </div>
+
+    <!-- Filters & Actions bar -->
+    <div class="search-bar-container">
+        <form method="get" class="search-form" style="flex-wrap: wrap; gap: 1rem;">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, department, designation..." class="search-input" style="min-width: 250px;">
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label style="margin-bottom: 0; font-size: 0.8rem;">Month</label>
+                    <select name="month" class="role-select" style="padding: 0.5rem 1rem; width: 140px;">
+                        {% for num, name in month_choices %}
+                            <option value="{{ num }}" {% if num == selected_month %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label style="margin-bottom: 0; font-size: 0.8rem;">Year</label>
+                    <select name="year" class="role-select" style="padding: 0.5rem 1rem; width: 100px;">
+                        {% for yr in year_choices %}
+                            <option value="{{ yr }}" {% if yr == selected_year %}selected{% endif %}>{{ yr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-search">Filter</button>
+            {% if search_query or selected_month or selected_year %}
+                <a href="{% url 'admin_attendance_report' %}" class="btn-clear" style="line-height: normal; display: inline-flex; align-items: center;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Master Attendance List Card -->
+    <div class="dashboard-card" style="width: 100%; max-width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Employee Sheets: {{ selected_month }}/{{ selected_year }}</h3>
+            <div style="display: flex; gap: 1rem;">
+                <a href="{% url 'admin_dashboard' %}" class="btn-secondary" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.85rem; line-height: 1.3;">Back to Dashboard</a>
+                <a href="{% url 'admin_attendance_create' %}" class="btn-add-employee"><span>+</span> Record Manual Log</a>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th style="text-align: center;">Present Days</th>
+                        <th style="text-align: center;">Working Weekdays</th>
+                        <th style="text-align: center;">Monthly Ratio</th>
+                        <th style="text-align: center;">Action Operations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in report_data %}
+                        <tr>
+                            <td><strong>{{ item.employee.name }}</strong></td>
+                            <td>{{ item.employee.department }}</td>
+                            <td>{{ item.employee.designation }}</td>
+                            <td style="text-align: center;">{{ item.present_days }}d</td>
+                            <td style="text-align: center;">{{ item.total_working_days }}d</td>
+                            <td style="text-align: center;">
+                                <strong style="color: {% if item.attendance_percentage >= 85 %}#34d399{% elif item.attendance_percentage >= 75 %}#fbbf24{% else %}#f87171{% endif %}; font-family: 'Outfit', sans-serif; font-size: 1rem;">
+                                    {{ item.attendance_percentage|floatformat:1 }}%
+                                </strong>
+                            </td>
+                            <td>
+                                <div class="action-links" style="justify-content: center;">
+                                    <a href="{% url 'employee_attendance_report' %}?employee_id={{ item.employee.pk }}&month={{ selected_month }}&year={{ selected_year }}" class="action-link action-view">View Logs</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                No employee sheets found matching search criteria.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

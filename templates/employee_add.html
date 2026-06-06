@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Employee{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 600px;">
+    <h2 class="gradient-title">Add Employee</h2>
+    <p class="subtitle" style="margin-bottom: 1.5rem;">Create a new staff identity and associated portal credentials</p>
+
+    {% if form.non_field_errors %}
+        <div class="error-list">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1.25rem; color: var(--accent-cyan);">Corporate Details</h3>
+        
+        {% for field in form %}
+            {% if field.name != 'username' and field.name != 'password' %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="help-text">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <div class="error-list" style="margin-top: 0.5rem; margin-bottom: 0; padding: 0.5rem 1rem;">
+                            {{ field.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-top: 2rem; margin-bottom: 1.25rem; color: var(--accent-purple);">Portal Credentials</h3>
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.help_text %}
+                <span class="help-text">{{ form.username.help_text }}</span>
+            {% endif %}
+            {% if form.username.errors %}
+                <div class="error-list" style="margin-top: 0.5rem; margin-bottom: 0; padding: 0.5rem 1rem;">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {% if form.password.help_text %}
+                <span class="help-text">{{ form.password.help_text }}</span>
+            {% endif %}
+            {% if form.password.errors %}
+                <div class="error-list" style="margin-top: 0.5rem; margin-bottom: 0; padding: 0.5rem 1rem;">
+                    {{ form.password.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <a href="{% url 'admin_dashboard' %}" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; line-height: 1.3;">Cancel</a>
+            <button type="submit" class="btn-submit" style="flex: 1; margin: 0; line-height: 1;">Save Employee</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Leave Requests{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Django Messages feedback -->
+    {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Welcome Header -->
+    <div class="welcome-banner">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Employee Time Off Requests</h1>
+        <p style="color: var(--text-muted);">Enterprise Leave Administration Operations Panel</p>
+    </div>
+
+    <!-- Filters Box -->
+    <div class="search-bar-container" style="margin-bottom: 2rem;">
+        <form method="get" class="search-form" style="flex-wrap: wrap; gap: 1rem; align-items: center;">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, department, or reason..." class="search-input" style="flex: 2; min-width: 250px;">
+            
+            <div style="display: flex; gap: 1rem; align-items: center; flex: 1; min-width: 200px;">
+                <label style="margin-bottom: 0; white-space: nowrap;">Status:</label>
+                <select name="status" class="role-select" style="padding: 0.65rem 1rem; border-radius: 8px;">
+                    <option value="">All Statuses</option>
+                    {% for key, val in status_choices %}
+                        <option value="{{ key }}" {% if key == selected_status %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn-search" style="padding: 0.65rem 1.5rem;">Apply Filters</button>
+            
+            {% if search_query or selected_status %}
+                <a href="{% url 'admin_leave_list' %}" class="btn-clear" style="line-height: normal; display: inline-flex; align-items: center; padding: 0.65rem 1.25rem;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Requests list card -->
+    <div class="dashboard-card" style="width: 100%; max-width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Employee Absence Requests</h3>
+            <a href="{% url 'admin_dashboard' %}" class="btn-secondary" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.85rem; line-height: 1.3;">Back to Dashboard</a>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reason for Leave</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                        <tr>
+                            <td><strong>{{ req.employee.name }}</strong></td>
+                            <td>{{ req.employee.department }}</td>
+                            <td>{{ req.start_date|date:"M d, Y" }}</td>
+                            <td>{{ req.end_date|date:"M d, Y" }}</td>
+                            <td style="max-width: 250px; word-wrap: break-word; white-space: normal;">{{ req.reason }}</td>
+                            <td>
+                                {% if req.status == 'Approved' %}
+                                    <span class="badge badge-approved">Approved</span>
+                                {% elif req.status == 'Rejected' %}
+                                    <span class="badge badge-rejected">Rejected</span>
+                                {% else %}
+                                    <span class="badge badge-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                    {% if req.status == 'Pending' %}
+                                        <form action="{% url 'approve_leave' pk=req.pk %}" method="post" style="display:inline; margin:0;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="action-link action-view" style="border:none; cursor:pointer; font-weight:600; padding: 0.4rem 0.75rem; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.8rem;">
+                                                Approve
+                                            </button>
+                                        </form>
+                                        <form action="{% url 'reject_leave' pk=req.pk %}" method="post" style="display:inline; margin:0;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="action-link action-delete" style="border:none; cursor:pointer; font-weight:600; padding: 0.4rem 0.75rem; border-radius: 6px; background: rgba(239, 68, 68, 0.15); color: #f87171; font-size: 0.8rem;">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Processed</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                No leave requests match the selected filters.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

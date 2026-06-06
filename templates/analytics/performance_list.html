@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Employee Performance Reviews{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Django Messages feedback -->
+    {% if messages %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Performance Reviews</h1>
+        <p style="color: var(--text-muted);">Enterprise Performance & Appraisal Control Center</p>
+    </div>
+
+    <!-- Filters & Actions -->
+    <div style="display: flex; gap: 1.5rem; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap;">
+        <!-- Filter Form -->
+        <form method="get" class="search-form" style="margin: 0; gap: 1rem; flex: 1; min-width: 300px; flex-wrap: wrap;">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search by employee name or department..." class="search-input" style="flex: 2; min-width: 200px;">
+            
+            <select name="month" class="role-select" style="flex: 1; min-width: 120px; padding: 0.65rem 1rem; border-radius: 8px;">
+                <option value="">All Months</option>
+                {% for num, name in month_choices %}
+                    <option value="{{ num }}" {% if selected_month == num|stringformat:"d" %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="year" class="role-select" style="flex: 1; min-width: 100px; padding: 0.65rem 1rem; border-radius: 8px;">
+                <option value="">All Years</option>
+                {% for yr in year_choices %}
+                    <option value="{{ yr }}" {% if selected_year == yr|stringformat:"d" %}selected{% endif %}>{{ yr }}</option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit" class="btn-search" style="padding: 0.65rem 1.5rem;">Filter</button>
+            {% if search_query or selected_month or selected_year %}
+                <a href="{% url 'admin_performance_list' %}" class="btn-clear" style="line-height: normal; display: inline-flex; align-items: center; padding: 0.65rem 1.25rem;">Reset</a>
+            {% endif %}
+        </form>
+
+        <!-- Action Links -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{% url 'admin_ai_predict' %}" class="btn-add-employee" style="background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-indigo) 100%); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);"><span>🤖</span> AI Predictor Tool</a>
+            <a href="{% url 'admin_performance_create' %}" class="btn-add-employee"><span>+</span> Record Score</a>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="dashboard-card" style="width: 100%; max-width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Appraisal Log</h3>
+            <a href="{% url 'admin_dashboard' %}" class="btn-secondary" style="width: auto; padding: 0.5rem 1.25rem; font-size: 0.85rem; line-height: 1.3;">Back to Dashboard</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Period</th>
+                        <th>Attendance %</th>
+                        <th>Task Completion %</th>
+                        <th>Project Rating</th>
+                        <th>Weighted Score</th>
+                        <th>AI Grade</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in records %}
+                        <tr>
+                            <td><strong>{{ rec.employee.name }}</strong></td>
+                            <td>{{ rec.month }}/{{ rec.year }}</td>
+                            <td>{{ rec.attendance_percentage|floatformat:1 }}%</td>
+                            <td>{{ rec.task_completion_percentage|floatformat:1 }}%</td>
+                            <td>{{ rec.project_rating|floatformat:1 }} / 5.0</td>
+                            <td><strong style="color: var(--accent-cyan);">{{ rec.performance_score|floatformat:2 }}</strong></td>
+                            <td>
+                                {% if rec.ai_grade == 'Excellent' %}
+                                    <span class="badge badge-excellent">Excellent</span>
+                                {% elif rec.ai_grade == 'Good' %}
+                                    <span class="badge badge-good">Good</span>
+                                {% elif rec.ai_grade == 'Average' %}
+                                    <span class="badge badge-average">Average</span>
+                                {% else %}
+                                    <span class="badge badge-poor">Poor</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                    <a href="{% url 'admin_performance_edit' pk=rec.pk %}" class="action-link action-edit">Edit</a>
+                                    <form action="{% url 'admin_performance_delete' pk=rec.pk %}" method="post" style="display:inline; margin:0;" onsubmit="return confirm('Are you sure you want to delete this performance record?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="action-link action-delete" style="border:none; background:none; cursor:pointer; font-family:inherit; font-size:inherit; padding:0;">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                                No performance records found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
